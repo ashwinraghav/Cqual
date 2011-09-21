@@ -1,0 +1,57 @@
+#!/usr/bin/perl
+
+@newargs = ();
+$cfile = "";
+$ofile = "";
+$nextisofile = 0;
+foreach $arg (@ARGV) {
+    if ($nextisofile) {
+	if ($ofile ne "") { die "Already found object $ofile\n"; }
+	$ofile = $arg;
+	$nextisofile = 0;
+    }
+    elsif ($arg =~ /\.c$/) {
+	$cfile = $arg;
+    }
+    elsif ($arg eq "-o") {
+	$nextisofile = 1;
+    }
+    else {
+	push(@newargs, $arg);
+    }
+}
+if ($nextisofile) { die "-o but no file\n"; }
+if ($cfile ne "") {
+    $ifile = $cfile;
+    $ifile =~ s/c$/i/;
+    push (@newargs, "-o", $ifile, $cfile, "-E");
+    system("/usr/bin/gcc", @newargs) == 0
+	or die "gcc @newargs failed: $?";
+    rename ($ifile, "$ifile.save");
+# optional:  could also remove lines beginning with # -- add
+# |(^\#) to the end of the pattern
+    $res = system('grep -Ev \'(^[^[:graph:]{}\t]*$)|(^\#)\'' .
+		  " $ifile.save > $ifile");
+    $res == 0 or $res == 256 or die "grep $ifile.save failed: $?";
+    unlink("$ifile.save");
+    pop (@newargs);
+    pop (@newargs);
+    pop (@newargs);
+    pop (@newargs);
+    push (@newargs, "-Dchange_type(x,y)=");
+    push (@newargs, "-Dassert_type(x,y)=");
+    push (@newargs, "-D\$unlocked=");
+    push (@newargs, "-D\$locked=");
+    push (@newargs, "-D\$read=");
+    push (@newargs, "-D\$write=");
+    push (@newargs, "-D\$open=");
+    push (@newargs, "-D\$close=");
+    push (@newargs, "-xc");
+    push (@newargs, $ifile);
+    if ($ofile ne "") { push (@newargs, "-o", $ofile); }
+    system("/bin/echo", @newargs);
+}
+else {
+    if ($ofile ne "") { push (@newargs, "-o", $ofile); }
+}
+exec("/usr/bin/gcc", @newargs);

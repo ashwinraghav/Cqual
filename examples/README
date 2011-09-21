@@ -1,0 +1,46 @@
+This directory contains a number of small examples to try analyzing
+with cqual.
+
+Tainted/untainted examples
+--------------------------
+
+taint0.c	A short, unannotated program with a format-string bug
+taint1.c	taint0.c with annotations
+taint2.c	A more complicated taint-flow path
+taint-cast.c	Shows how taint interacts with casting.
+		Try analyzing this with and without -fcasts-preserve
+taint-const-subtyping.c
+		Shows how const improves the analysis precision
+taint-poly.c	Demonstrates how polymorphism works
+taint-varargs.c	Shows how `...' can be annotated with a qualifier
+
+Locked/unlocked examples
+------------------------
+
+lock.c		A simple program that changes the state of a lock
+lock2.c		lock.c rewritten to use change_type
+lock3.c		locks used in function calls
+linux-lock.{c,i}  checking for simple deadlocks in the linux kernel
+linux-lock2.{c,i} checking for simple deadlocks in the linux kernel
+		-- in both these examples we inline the definition of
+		   spin_lock and spin_unlock, because we do not
+		   have polymorphism in the flow-sensitive system
+
+Y2K examples
+------------
+
+The remaining examples in this directory show how cqual can be used to
+find Y2K bugs in C programs, like Carillon.  To try these examples you
+need to un-comment out the Y2K qualiifers in the default lattice
+file.  Note that the path browsing in PAM mode doesn't work correctly
+with these qualifiers.
+
+Note:  To run these examples, disable -fflow-sensitive in your .emacs file.
+
+y2k1.c		A short, unannotated program with a Y2K bug (from Carillon)
+y2k2.c		The annotated version of y2k1.c (from Carillon)
+y2k3.c		A program showing how the sometimes non-intuitive flow
+		of the Y2K qualifiers
+y2k4.c		An example showing how to add qualifiers to the *
+		operator
+rcs[1-3].c	A more complicated example with a Y2K bug (from Carillon)

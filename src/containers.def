@@ -1,0 +1,62 @@
+;; -*-Lisp-*-
+
+;  This file is part of cqual.
+;  Copyright (C) 2000-2002 The Regents of the University of California.
+;
+; cqual is free software; you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation; either version 2, or (at your option)
+; any later version.
+;
+; cqual is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with cqual; see the file COPYING.  If not, write to
+; the Free Software Foundation, 59 Temple Place - Suite 330,
+; Boston, MA 02111-1307, USA.
+
+;; Definitions for type-safe containers
+
+;; (defset name cmp-fn element-type)
+;;   name is the name of the new set type
+;;   cmp-fn is the element comparison function
+;;   element-type is the type of the set elements
+
+;; (defbag name element-type)
+;;   name is the name of the new bag type
+;;   element-type is the type of the bag elements
+
+;; (defmap name domain-type range-type hash-fn keyeq-fn)
+;;   name is the name of the new map type
+;;   domain-type is the type of the domain
+;;   range-type is the type of the range
+;;   hash-fn is the hashing function for the domain
+;;   keyeq-fn is the equality function for the domain
+
+(defset ty_set cmp_ty ty)
+(defset qual_set cmp_qual qual)
+(defset qual_set_byname cmp_qual_byname qual)
+(defset loc_set location_cmp location)
+
+(defbag aloctype_set aloctype)
+(defbag alocreftype_set alocreftype)
+(defbag alocfntype_set alocfntype)
+(defbag effecttype_set effecttype)
+
+(defbag effect_set effect)
+(defbag store_edge_set store_edge)
+(defbag po_set po_info)
+(defbag qual_edge_set qual_edge)
+(defbag cond_set cond)
+
+;(defmap type_hash_table type type type_hash type_cmp)
+(defmap aloc_int_map aloc int hash_aloc eq_aloc)
+(defmap cell_map aloc cell hash_aloc eq_aloc)
+(defmap bitset_bounds_map bitset bounds bitset_hash bitset_eq)
+(defmap pam_file_map "const char *" pam_file string_hash string_eq)
+(defmap pam_click_map "const char *" pam_click string_hash string_eq)
+(defmap pam_buffer_map "const char *" pam_click_map string_hash string_eq)
+(defmap pam_overlay_map location pam_overlay location_hash location_eq)

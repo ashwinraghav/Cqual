@@ -1,0 +1,25 @@
+This is cqual, a type qualifier inference system for C.  To install cqual, run
+configure and then make:
+
+	./configure
+	make
+
+If all goes well, the makefile will build two executables in the src
+directory:  cqual, the type qualifier inference system, and iquals, a
+small tool for experimenting with qualifier constraints.  The makefile
+will also build PAM (Program Analysis Mode for emacs) and append some
+commands to your .emacs file so that you can run cqual using PAM.
+
+See the full documentation in doc/user-guide.{ps,pdf} for, among other
+things, an introductory tutorial.
+
+This is a beta version of cqual.  See Appendix A of the documentation
+for known bugs and limitations.
+
+cqual is distributed under the GNU General Public License. See the
+COPYRIGHT and COPYING files for more details. Note that the region
+library (libcompat/) is not distributed under the GNU General Public
+License. See that directory for details.
+
+cqual is based on the C front-end used in David Gay's Region Compiler,
+which is in turn based on the GNU C Compiler.

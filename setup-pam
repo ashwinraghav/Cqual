@@ -1,0 +1,120 @@
+#!/usr/bin/perl
+
+#    This file is part of cqual.
+#    Copyright (C) 2000-2002 The Regents of the University of California.
+# 
+# cqual is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+# 
+# cqual is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with cqual; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+$outfile="$ENV{HOME}/.emacs";
+
+if (system("grep 'pam-analyze-file' $outfile > /dev/null 2>&1") == 0)
+{
+    print "\nNOTE:  you seem to have already updated $HOME/.emacs for cqual,";
+    print "\nso it will not be done again.\n\n";
+    exit(0);
+}
+
+open (OUT, ">>$outfile") || die "error opening $outfile";
+
+if (system("which cygpath > /dev/null 2>&1") == 0) {
+    # cygwin -- emacs files must be related to root drive
+    chomp($wcwd=`cygpath -a -w .`);
+    $wcwd =~ s/\\/\//g; # replace \'s with /'s
+    $pamdir="$wcwd/PAM-3";
+    $srcdir="$wcwd/src";
+    chomp($cwd=`pwd`);
+    $configdir="$cwd/config"; # cqual is a cygwin app, so use local names
+}
+else {
+    # Normal unix
+    chomp($cwd=`pwd`);
+    $pamdir="$cwd/PAM-3";
+    $srcdir="$cwd/src";
+    $configdir="$cwd/config";
+}
+
+print OUT <<EOF
+
+;;; -----------------------------------------------
+;;;  PAM
+;;; -----------------------------------------------
+
+(setq load-path (append (list "$pamdir"
+			      "$pamdir/elib")
+			load-path))
+(autoload 'pam-analyze-file "pam-3" "Load Program Analysis Mode" t)
+(autoload 'pam-sml-analyze-file "pam-3" "Load Program Analysis Mode" t)
+(autoload 'pam-full-analyze-file "pam-3" "Load Program Analysis Mode" t)
+
+;;; Set up PAM mode to run cqual
+
+(autoload 'pam-analyze-file "pam-3" "Qualifier inference" t)
+(autoload 'pam-analyze-file-common "pam-3" "Qualifier inference" t)
+
+(setq pam-default-analysis '("$srcdir/cqual"
+			     "-fpam-mode"
+			     "-hotspots"
+			     "10"
+; Note:  you can't have both -fflow-sensitive and -fcasts-preserve on
+; Note:  -fflow-sensitive uses extra memory even if you don't use any
+;        flow-sensitive qualifiers, so you should disable it if you're not
+;        using it
+                             "-fflow-sensitive"
+;                             "-fcasts-preserve"
+;			      "-prelude"
+;			      "$configdir/prelude.i"
+			     "-config"
+			     "$configdir/lattice"))
+(fset 'cqual 'pam-analyze-file)
+
+(require 'pam-faces)
+
+;;; Custom PAM colors
+
+;;; You can change the default colors here
+(custom-set-faces
+ '(pam-color-1 ((t (:foreground "olive drab" :underline t))) t)
+ '(pam-color-2 ((t (:foreground "turquoise" :underline t))) t)
+ '(pam-color-3 ((t (:foreground "greenyellow" :underline t))) t)
+ '(pam-color-4 ((t (:foreground "aquamarine" :underline t))) t)
+ '(pam-color-5 ((t (:foreground "purple" :underline t))) t)
+ '(pam-color-6 ((t (:foreground "red" :underline t))) t)
+ '(pam-color-7 ((t (:foreground "green" :underline t))) t)
+ '(pam-color-8 ((t (:foreground "maroon" :underline t))) t)
+ '(pam-color-mouse ((t (:foreground "white" :background "grey" :underline t))) t))
+
+;;; Add new colors here
+
+; Tainting qualifier colors
+(pam-add-face pam-color-tainted ((t (:foreground "red" :underline t))))
+(pam-add-face pam-color-untainted ((t (:foreground "green" :underline t))))
+
+; Y2K qualifier colors
+(pam-add-face pam-color-yyyy ((t (:foreground "greenyellow" :underline t))))
+(pam-add-face pam-color-yy   ((t (:foreground "lightblue" :underline t))))
+(pam-add-face pam-color-nonyear ((t (:foreground "mediumblue" :underline t))))
+(pam-add-face pam-color-ww50 ((t (:foreground "red" :underline t))))
+(pam-add-face pam-color-rcsdate ((t (:foreground "green" :underline t))))
+
+; Locking qualifier colors
+(pam-add-face pam-color-locked ((t (:foreground "red" :underline t))))
+(pam-add-face pam-color-unlocked ((t (:foreground "green" :underline t))))
+(pam-add-face pam-color-unknown ((t (:foreground "purple" :underline t))))
+EOF
+
+    ;
+close(OUT);
+print "CQual and PAM mode added to .emacs file\n";

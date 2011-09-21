@@ -1,0 +1,5 @@
+This is Program Analysis Mode (PAM) version 3.0, for Emacs,
+distributed with cqual.
+
+This instance of PAM is designed to be installed with cqual rather than as a
+stand-alone system.  Please see the installation instructions for cqual.

@@ -1,0 +1,56 @@
+The following (<cmd>) can be sent to the Emacs process:
+------------------------------------------------------------
+
+<cmd> ::= (pam-overlays <overlay-list>)
+       |  (pam-blobs <blob-list>)
+
+       |  (pam-clear-window <window>)
+       |  (pam-change-window <window>)
+       |  (pam-set-window-down <window>)
+       |  (pam-set-window-up <window>)
+       |  (pam-close-window <window>)
+       |  (pam-split-window <window>)
+
+       |  (pam-set-access <window> <access>)
+
+       |  (pam-goto-char <window> <pos>)
+       |  (pam-debug "<text>")
+       |  (pam-message "<text>")
+       |  (pam-default-path "<path>")
+
+       |  (pam-waiting)
+
+<window> ::= ("<file>" "<type>")
+
+<type> ::= "file" | "buffer"
+<access> ::= "read-only" | "read-write"
+
+<markup> ::= (markup (<pos> <pos>) (<highlight>) "<text>")
+<hyper> ::= (hyper "<name>" (<pos> <pos>) (<highlight>) "<text>")
+
+<overlay-atom> ::= <markup>
+		|  <hyper>
+		|  (file <window>)
+<overlay-list> ::= <overlay-atom>
+		|  <overlay-atom> <overlay-list>
+
+<blob-list> ::= <blob>
+             |  <blob> <blob-list>
+
+<blob> ::= (text "<text>")
+        |  (file <window>)
+        |  <hyper>
+        |  <markup>
+
+<file>, <highlight>, <text>, <window> ::= <string>
+<pos> ::= <int>
+<path> ::= <path name>
+
+Comments: ------------------------------------------------------------
+
+* For <blob>'s, the ("<file>" "<type>") arguments within <hyper> and
+  <markup> are discarded. Instead the last seen, in the <blob-list>,
+  (file ("<file>" "<type>")) is taken as the specification.
+
+* The command "///" actually causes PAM to start accepting commands.
+  Everything before that is ignored.

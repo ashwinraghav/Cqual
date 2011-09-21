@@ -1,0 +1,415 @@
+This is pam-mode.info, produced by makeinfo version 4.2 from
+pam-mode.texi.
+
+   This info page describes the Program Analysis mode (PAM, for short)
+version 3.0 for Emacs.
+
+   Copyright (C) 1999-2001 The Regents of the University of California.
+
+   PAM is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2, or (at your option) any later
+version.
+
+   PAM is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+   You should have received a copy of the GNU General Public License
+along with PAM; see the file COPYING.  If not, write to the Free
+Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA.
+
+
+File: pam-mode.info,  Node: Top,  Next: Copying,  Up: (dir)
+
+Program Analysis Mode
+*********************
+
+   This info page describes the Program Analysis Mode (PAM, for short),
+a minor mode for Emacs.
+
+   It applies to version 3.0 of both the Emacs Lisp and ML portions of
+code contained in the package.
+
+* Menu:
+
+* Copying::       Your rights
+* Installation::  What to do before you start
+* Start::         What to do first
+* Source::        How to set things up for SML/NJ and other compilers
+* Variables::     Variable definitions
+* Functions::     Functions
+* Keybindings::   Keyboard and mouse bindings
+* Contact::       How to contact us
+
+
+File: pam-mode.info,  Node: Copying,  Next: Installation,  Prev: Top,  Up: Top
+
+     Copyright (C) 1999-2001 The Regents of the University of
+     California.
+
+     PAM is free software; you can redistribute it and/or modify it
+     under the terms of the GNU General Public License as published by
+     the Free Software Foundation; either version 2, or (at your option)
+     any later version.
+
+     PAM is distributed in the hope that it will be useful, but WITHOUT
+     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+     or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+     License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with PAM; see the file COPYING.  If not, write to the Free
+     Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+     02111-1307, USA.
+
+
+File: pam-mode.info,  Node: Installation,  Next: Start,  Prev: Copying,  Up: Top
+
+Installation
+************
+
+   For information about installation, see the file 'README', or run
+'make' in the PAM source directory.
+
+
+File: pam-mode.info,  Node: Start,  Next: Source,  Prev: Installation,  Up: Top
+
+Getting started
+***************
+
+   The first thing you need to do is set up your `.emacs' file for the
+analysis that you would like to run.  Each analysis should provide
+appropriate commands to set it up in its own documentation.  However,
+here is an example in case you want to make your own.
+
+   This analysis is called `simple' and should have come with your PAM
+distribution in a sub-directory.  Before continuing, you should have
+installed the SML/NJ compiler and run the command `make simple' in the
+directory containing the PAM distribution.  This produces an executable
+binary called `simple.ARCH', where `ARCH' depends on the kind of
+computer you are running.  For example, on a Linux machine, this is
+usually `x86-linux'.
+
+   Next, add these lines to your `.emacs' file (warning: this assumes
+you have already installed PAM correctly according to the instructions
+in the *Note Installation:: section):
+
+     ; [1]
+      (setq pam-default-analysis '("sml-cm" "@SMLload=SIMPLE_PATH/simple.ARCH"
+                                   "SIMPLE_PATH/dictionary"))
+     ; [2]
+      (setq pam-default-sml-analysis '("SIMPLE_PATH/simple"
+                                       "SIMPLE_PATH/dictionary"))
+
+   In the Emacs Lisp lines above, you need to substitute the full path
+where the `simple' example analysis binary is stored wherever it says
+`SIMPLE_PATH'.  Remember that you should also replace `ARCH' with the
+extension SML/NJ gives for your particular type of computer.
+
+   Now you need to load these changes into Emacs.  This can be
+accomplished by restarting Emacs.  After the changes have been read by
+Emacs, you should be able to type three different commands to get the
+analysis started:
+
+     [3]  `M-x pam-analyze-file'
+     [4]  `M-x pam-sml-analyze-file'
+     [5]  `M-x pam-full-analyze-file'
+
+   Typing [3] (i.e. `M-x pam-analyze-file', not the "[3] " part) will
+use the information you gave above in your `.emacs' file to initialize
+the system.  It will then arrive at a prompt for more information
+saying "File to analyze: ".  Enter the file to be analyzed (for the
+`simple' analysis, any text file will do).  If all goes well, the Table
+of Contents screen will appear with a summary analysis of the input
+file you provided.  Items there that are underlined should be clickable
+(with the middle mouse button, or if you prefer keyboard interaction
+you can move the cursor on top of a highlighted word and type `C-c
+C-l').
+
+   On the other hand, if you had executed [4] or [5], you would have
+been prompted one extra time at the beginning *before* the "File to
+analyze: " prompt.  They ask for more specific information if you need
+to give it: `pam-sml-analyze-file' expects its first input to be
+something with the same syntax as the `pam-default-sml-analysis'
+variable you set above (see the comment [2]), and
+`pam-full-analyze-file expects' (you guessed it) something with the
+same syntax as the `pam-default-analysis' variable.  See *Note
+Variables:: for more details.  If possible, use pam-sml-analyze-file,
+since its inputs are simpler.
+
+   That's pretty much it as far as the Emacs and user side goes.
+Various configuration variables and key bindings, along with the
+semantics of the PAM "minor mode", are described in the next sections,
+but you can probably guess at them with a little exploration.
+
+
+File: pam-mode.info,  Node: Source,  Next: Variables,  Prev: Start,  Up: Top
+
+Analysis source types
+*********************
+
+   The only SML compiler that we have tested with PAM is SML/NJ.  Other
+compilers should work with minor changes.  We assume several things for
+`pam-sml-analyze-file' to work correctly:
+
+  1. The sml program (given by the global variable `sml-program-name';
+     see *Note Variables::) is in the operating system path.
+
+  2. Your system configuration is one of the ones we support directly,
+     or you have put yours into the configuration table variable (again,
+     see *Note Variables::).
+
+  3. Your version of SML/NJ is compatible with the SML'97 way of doing
+     things.  It must support:
+
+        * The "@SMLload" argument to load a binary
+
+        * The use of specific system configuration extensions on binary
+                names.  For instance, on an x86 Linux system, the
+          `simple'        analysis' binary is called "simple.x86-linux"
+
+
+
+   If any of 1, 2 or 3 are not the case, you will probably have to use
+pam-full-analyze-file, since it makes no assumptions about your system
+at all.
+
+   We have not yet tested the system with any other SML compilers
+(MLWorks, MLTon, MLj, MLKit, etc.).  However, it should be trivial to
+compile binaries and connect them to the Emacs interface with the
+appropriate setting of `pam-full-analyze-file'.  The only things really
+necessary are the ability of Emacs to connect to the binary as a child
+process and have their stdout/stdin interfaces thereby connected.  If
+you come up with the right way to do it, please send us your
+configuration so it can be added to the interface in the next version.
+
+
+File: pam-mode.info,  Node: Variables,  Next: Functions,  Prev: Source,  Up: Top
+
+PAM system variables
+********************
+
+   * `pam-default-analysis' (default: nil)
+
+     This is the default analysis used by both `pam-full-analyze-file'
+     and `pam-analyze-file'.  It has the format:
+
+          "program" "arg1" "arg2" ... "argn"
+
+     It is very important that all members of this list are proper
+     strings.
+
+     `program' = The name of the program to run; if it isn't in the
+     operating system path you will need to specify an absolute one.
+
+     `argN' (for all N) = The text of the Nth argument to pass to
+     program.  Note that it will be globbed by the file system.
+
+   * `pam-sml-default-analysis' (default: nil)
+
+     This is the default initialization used by `pam-sml-analyze-file'.
+     It has the format:
+
+          ("binary-file-name-prefix" "arg1" "arg2" ... "argn")
+
+     `binary-file-name-prefix' = Everything in the name of the SML/NJ
+     binary file preceding the dot (".") and the architecture-specific
+     extension.  For example, in the `simple' analysis, the complete
+     file name might be "simple.x86-linux" while the prefix is just
+     "simple".  The advantage of not specifying this precisely is that
+     if you have a heterogeneous computing environment (like we do: our
+     lab has Sun, HP, DEC and Intel systems) no special configuration
+     (other than recompiled binaries) will be needed on specific
+     machines.
+
+   * `pam-results-buf' (default "*pam-results-buf*")
+
+     The name of the buffer where raw data from the analysis program
+     appears.  Rename this if you like.
+
+   * `pam-debug-buf'  (default: "*pam-debug-buf*")
+
+     The name of the buffer where debugging information from the
+     analysis program appears.  Rename this if you like.
+
+   * `sml-program-name' (default: "sml-cm")
+
+     Used as a shortcut when running sml analyses.  The version bound
+     by the sml-mode package will automatically override this if it's
+     loaded first.
+
+   * `pam-sml-system-configuration-table' (default: nil)
+
+     A list of cons cells, each of which has a regular expression
+     against which to match in the car field, and the extension to put
+     after a file name in the cdr field.  This is used to deduce the
+     filename extension to be used in `pam-sml-analyze-file'.  The
+     regular expressions match against the global Emacs variable
+     `system-configuration'.  Only insert values in this table if the
+     predefined ones don't work for you.  This list is checked *before*
+     any of the built-in heuristics are performed.
+
+   * `pam-color-n', where n is in the set [1, ..., 8]
+
+     The eight different PAM colors that can be chosen by the SML
+     process for display.  You may need to configure these if the
+     standard colors look terrible.  They can be changed by simply
+     setting them, as in:
+
+          (setq pam-color-1 'highlight)
+
+     This will make pam-color-1 have the same color as the built-in
+     Emacs face `highlight'.  Alternatively, you can use the
+     `custom-set-faces' function to create your own faces (see the
+     Emacs documentation for more details).  (Note: default values
+     intentionally left blank)
+
+   * `pam-highlight-color' (default: 'highlight)
+
+     The face PAM uses to draw a highlighted element in a PAM file, as
+     directed by the SML process.  You can set this to be any color you
+     like (see just above).
+
+
+
+File: pam-mode.info,  Node: Functions,  Next: Keybindings,  Prev: Variables,  Up: Top
+
+Functions
+*********
+
+   Notes on interactive entries in the Emacs minibuffer:
+
+   * If a file name is expected (for example, with the last prompt of
+     "File to analyze: "), filename completion is provided for you,
+     through the use of [TAB] as usual.  However, the final entered
+     string _does not_ have to be an actual file name or directory.
+     You can also use the history list described below.
+
+   * If it is not a file name (for example, with the first prompt of
+     `pam-sml-analyze-file' or `pam-full-analyze-file'), you can use a
+     history list kept specifically for those inputs.  Use `M-p' to go
+     up the list and `M-n' to go down.  Consult the Emacs documentation
+     for more details, since this is a standard feature of Emacs input
+     buffers.
+
+     You can execute these functions in the usual Emacs way by typing
+     `M-x function-name':
+
+   * `pam-analyze-file'
+
+     This uses the `pam-default-analysis' global variable to decide what
+     analysis to use, then prompts for the name of the data to pass to
+     it.
+
+   * `pam-sml-analyze-file'
+
+     This is the same as `pam-analyze-file', except that it asks you
+     first for a list structure to execute (see the description of
+     `pam-sml-default-analysis' in *Note Variables::, for details on the
+     input format).
+
+   * `pam-full-analyze-file'
+
+     This is the same as `pam-sml-analyze-file', except that it asks you
+     for a list in the format of pam-default-analysis instead.
+
+   * `pam-mode'
+
+     Toggles whether the PAM minor mode is active in the current buffer.
+
+   * `pam-reset'
+
+     Resets the PAM system, including emptying internal variables and
+     closing all PAM-opened buffers.  Note that if you have a source
+     buffer open before PAM is run, it will remain open after
+     `pam-reset' has been executed, while if PAM opens the buffer
+     itself, it will be closed.  This function is automatically called
+     by the `pam-*-analyze-file' functions.
+
+
+
+File: pam-mode.info,  Node: Keybindings,  Next: Contact,  Prev: Functions,  Up: Top
+
+Keybindings and mouse bindings
+******************************
+
+   Note that these key and mouse bindings will only work in a buffer
+with the PAM minor mode running.  You can tell if it is running by
+checking if it says "PAM" in the status line of the current buffer.
+
+   Keyboard bindings:
+
+   * `C-c C-f'
+
+     A shorthand for `pam-analyze-file'.
+
+   * `C-c C-r'
+
+     A shorthand for `pam-reset'.
+
+   * `C-c C-l'
+
+     Does the equivalent of _clicking_ on the text under the cursor.
+     If that text is a hyperlink, it will be followed.
+
+   * `C-c C-i'
+
+     Loads the GNU info documentation for PAM.
+
+   * `C-c C-m'
+
+     Toggles PAM mode in the current buffer.
+
+
+   Mouse Bindings:
+
+   * Middle mouse button
+
+     Activates a "click" on the character underneath the mouse cursor.
+     If the character is part of a clickable hyperlink, then that
+     hyperlink will be followed.
+
+   * Right mouse button
+
+     Activates a "click" on the region currently highlighted in the
+     buffer.  For example, if you highlight a specific word, then click
+     the right mouse button, PAM will look for the hyperlink that most
+     closely matches the highlighted region, and execute that
+     hyperlink.  This functionality is useful when hyperlinks overlap
+     in the file, and hence simply clicking on a hyperlink becomes
+     ambiguous.
+
+
+
+File: pam-mode.info,  Node: Contact,  Prev: Keybindings,  Up: Top
+
+How to contact us
+*****************
+
+   The authors, by email:
+
+   Chris Harrelson <chrishtr@cs.berkeley.edu>
+
+   Henning Niss
+
+   The web page:
+
+   <http://www.cs.berkeley.edu/~chrishtr/pam>
+
+
+
+Tag Table:
+Node: Top907
+Node: Copying1555
+Node: Installation2430
+Node: Start2647
+Node: Source6054
+Node: Variables7740
+Node: Functions11184
+Node: Keybindings13247
+Node: Contact14672
+
+End Tag Table
